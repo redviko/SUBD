@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -26,12 +27,11 @@ namespace SCDB_Slocnak_
         private void Form1_Load(object sender, EventArgs e)
         {
             listBox1.DisplayMember = "name";
-            Biblioteka knigga= new Biblioteka("Nevagno","Wtf","Genre","1234231","ERA", DateTime.Today, new DateTime(2000,2,13),"0/10 Гавно вообщем:D" );
-            Biblioteka knigga2= new Biblioteka("ppppp","xxxxxx","zzzzzz","123123123","Hui Znaet", DateTime.Today, DateTime.Today, "Жесть");
-            Biblioteka knigga3= new Biblioteka("zN","qweqwes","dqweqweeqw","5837491-2","Fade Summer", DateTime.Today, DateTime.Today, "11/10 qwe");
+            listBox2.DisplayMember = "name";
+            Biblioteka knigga= new Biblioteka("Nevagno","Wtf","Genre","1234231","ERA", "Мягкий", "ОтВерблюда","2019","2000","0/10 Burhable","1990" );
             listBox1.Items.Add(knigga);
-            listBox1.Items.Add(knigga2);
-            listBox1.Items.Add(knigga3);
+            //listBox1.Items.Add(knigga2);
+            //listBox1.Items.Add(knigga3);
             // if (ReadFile())
             // {
             //     MessageBox.Show("Успешно загружено");
@@ -43,31 +43,40 @@ namespace SCDB_Slocnak_
             // }
         }
 
-        private void textBox1_TextChanged(object sender, EventArgs e)
+        private void textBox1_TextChanged(object sender, EventArgs e) //Поиск по ListBox
         {
-            if (textBox1.TextLength!=0&&listBox1.Items.Count!=0)
+            try
             {
-                listBox1.BeginUpdate();
-                //listBox1.Items.Clear();
-                var result = from knigga in listBox1.Items.Cast<Biblioteka>().AsParallel()
-                    //from author in knigga.Authors
-                    //from genre in knigga.Genre
-                    where knigga.Name.Contains(textBox1.Text) || knigga.Genre.Contains(textBox1.Text) ||
-                          knigga.Authors.Contains(textBox1.Text)
-                    //where author.ToString().Contains(textBox1.Text)
-                    //where genre.ToString().Contains(textBox1.Text)
-                    select knigga;
-                foreach (Biblioteka biblioteka in result)
+                if (textBox1.TextLength != 0 && listBox1.Items.Count != 0)
                 {
-                    int i=0;
-                    i++;
+                    listBox1.SelectedIndex = -1;
+                    listBox2.BeginUpdate();
+                    listBox2.Items.Clear();
+                    var result = from knigga in listBox1.Items.Cast<Biblioteka>().AsParallel()
+                                 where knigga.Name.ToLower().Contains(textBox1.Text.ToLower()) || knigga.Genre.ToLower().Contains(textBox1.Text.ToLower()) ||
+                                       knigga.Authors.ToLower().Contains(textBox1.Text.ToLower())
+                                 select knigga;
+                    //foreach (Biblioteka biblioteka in result) //Проверочный КОД. Не трогать без причины;
+                    //{
+                    //    int i=0;
+                    //    i++;
+                    //}
+
+                    listBox1.Visible = false;
+                    listBox2.Items.AddRange(result.ToArray());
+                    listBox2.EndUpdate();
                 }
-                     listBox1.Items.AddRange(result.ToArray());
-                listBox1.EndUpdate();
+                else
+                {
+                    listBox2.SelectedIndex = -1;
+                    //MessageBox.Show("Либо в листбоксе нет элементов, либо строка поиска стала пустой"); //Разделить случай когда ничего не введено и когда нет элементов в листбоксе
+                    listBox1.Visible = true;
+
+                }
             }
-            else
+            catch (Exception aException)
             {
-                
+                MessageBox.Show($"Ошибка:{aException.Message}");
             }
         }
 
@@ -103,5 +112,71 @@ namespace SCDB_Slocnak_
                 return false;
             }
         }*/
+
+        private void listBox1_SelectedIndexChanged(object sender, EventArgs e) //Вывод информации об объектах из неотсортированного
+        {
+            if (listBox1.SelectedIndex!=-1)
+            {
+                Biblioteka biblioteka =(Biblioteka) listBox1.SelectedItem;
+                label12.Text = biblioteka.Name;
+                label13.Text = biblioteka.Authors;
+                label14.Text = biblioteka.Genre;
+                label15.Text = biblioteka.DateOfPublishing;
+                label16.Text = biblioteka.ISBN;
+                label17.Text = biblioteka.Publishing;
+                label18.Text = biblioteka.Binding;
+                label19.Text = biblioteka.Sourse;
+                label20.Text = biblioteka.DateInLibraryDateTime;
+                label21.Text = biblioteka.DateOfReading;
+                label22.Text = biblioteka.Comment;
+            }
+            else
+            {
+                label12.Text = String.Empty;
+                label13.Text = String.Empty;
+                label14.Text = String.Empty;
+                label15.Text = String.Empty;
+                label16.Text = String.Empty;
+                label17.Text = String.Empty; ;
+                label18.Text = String.Empty;
+                label19.Text = String.Empty;
+                label20.Text = String.Empty;
+                label21.Text = String.Empty;
+                label22.Text = String.Empty;
+            }
+        }
+
+        private void listBox2_SelectedIndexChanged(object sender, EventArgs e) //Вывод информации по книгам из отсортированного листбокса
+        {
+            if (listBox2.SelectedIndex!=-1)
+            {
+                Biblioteka biblioteka = (Biblioteka)listBox2.SelectedItem;
+                label12.Text = biblioteka.Name;
+                label13.Text = biblioteka.Authors;
+                label14.Text = biblioteka.Genre;
+                label15.Text = biblioteka.DateOfPublishing;
+                label16.Text = biblioteka.ISBN;
+                label17.Text = biblioteka.Publishing;
+                label18.Text = biblioteka.Binding;
+                label19.Text = biblioteka.Sourse;
+                label20.Text = biblioteka.DateInLibraryDateTime;
+                label21.Text = biblioteka.DateOfReading;
+                label22.Text = biblioteka.Comment;
+            }
+            else
+            {
+                label12.Text = String.Empty;
+                label13.Text = String.Empty;
+                label14.Text = String.Empty;
+                label15.Text = String.Empty;
+                label16.Text = String.Empty;
+                label17.Text = String.Empty; ;
+                label18.Text = String.Empty;
+                label19.Text = String.Empty;
+                label20.Text = String.Empty;
+                label21.Text = String.Empty;
+                label22.Text = String.Empty;
+            }
+        }
     }
 }
