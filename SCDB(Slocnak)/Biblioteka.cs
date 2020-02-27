@@ -9,6 +9,7 @@ namespace SCDB_Slocnak_
     class Biblioteka
     {
         // private static List<Biblioteka> booksList = new List<Biblioteka>();
+        public static Biblioteka TempBiblioteka = new Biblioteka();
         public String Name { get; set; }
         public String Authors { get; set; }
         public String Genre { get; set; }
@@ -45,7 +46,8 @@ namespace SCDB_Slocnak_
 
         public override string ToString()
         {
-            return base.ToString();
+            return
+                $"{Name};{Authors};{Genre};{DateOfPublishing};{ISBN};{Publishing};{Binding};{Sourse};{DateInLibraryDateTime};{DateOfReading};{Comment}";
         }
     }
 }

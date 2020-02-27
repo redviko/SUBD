@@ -45,45 +45,7 @@ namespace SCDB_Slocnak_
             //     MessageBox.Show("Что-то пошло не так. Произвожу закрытие программы");
             //     // Close();
             // }
-        }
-
-        //private void textBox1_TextChanged(object sender, EventArgs e) //Поиск по ListBox
-        //{
-        //    try
-        //    {
-        //        if (textBox1.TextLength != 0 && listBox1.Items.Count != 0)
-        //        {
-        //            listBox1.SelectedIndex = -1;
-        //            listBox2.BeginUpdate();
-        //            listBox2.Items.Clear();
-        //            var result = from knigga in listBox1.Items.Cast<Biblioteka>().AsParallel()
-        //                         where knigga.Name.ToLower().Contains(textBox1.Text.ToLower()) || knigga.Genre.ToLower().Contains(textBox1.Text.ToLower()) ||
-        //                               knigga.Authors.ToLower().Contains(textBox1.Text.ToLower())
-        //                         select knigga;
-        //            //foreach (Biblioteka biblioteka in result) //Проверочный КОД. Не трогать без причины;
-        //            //{
-        //            //    int i=0;
-        //            //    i++;
-        //            //}
-
-        //            listBox1.Visible = false;
-        //            listBox2.Items.AddRange(result.ToArray());
-        //            listBox2.EndUpdate();
-        //        }
-        //        else
-        //        {
-        //            listBox2.SelectedIndex = -1;
-        //            //MessageBox.Show("Либо в листбоксе нет элементов, либо строка поиска стала пустой"); //Разделить случай когда ничего не введено и когда нет элементов в листбоксе
-        //            listBox1.Visible = true;
-
-        //        }
-        //    }
-        //    catch (Exception aException)
-        //    {
-        //        MessageBox.Show($"Ошибка:{aException.Message}");
-        //    }
-        //}
-
+        } //Загрузка формы
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e) //Вывод информации об объектах из неотсортированного
         {
@@ -159,7 +121,9 @@ namespace SCDB_Slocnak_
 
                 if (open.ShowDialog() != DialogResult.Cancel)
                 {
-
+                    listBox1.Items.Clear();
+                    File.OpenText(open.FileName).ReadLine().Contains("4");
+                    File.
                     string[] allBookStrings = File.ReadAllLines(open.FileName, Encoding.Default);
                     if (allBookStrings.Length != 0)
                     {
@@ -170,11 +134,14 @@ namespace SCDB_Slocnak_
                             {
                                 MessageBox.Show("Запись повреждена");
                             }
-
-                            Biblioteka book = new Biblioteka(booksSplit[0], booksSplit[1], booksSplit[2], booksSplit[4],
-                                booksSplit[5], booksSplit[6], booksSplit[7], booksSplit[8], booksSplit[9], booksSplit[10],
-                                booksSplit[3]);
-                            listBox1.Items.Add(book);
+                            else
+                            {
+                                Biblioteka book = new Biblioteka(booksSplit[0], booksSplit[1], booksSplit[2], booksSplit[4],
+                                    booksSplit[5], booksSplit[6], booksSplit[7], booksSplit[8], booksSplit[9], booksSplit[10],
+                                    booksSplit[3]);
+                                listBox1.Items.Add(book);
+                            }
+                            
                         }
                     }
                     else
@@ -222,5 +189,61 @@ namespace SCDB_Slocnak_
                 MessageBox.Show($"Ошибка:{aException.Message}");
             }
         }
+
+        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                Add add=new Add();
+                add.ShowDialog();
+                File.AppendAllText($"C:\\Users\\User\\Documents\\LabResources\\BD.txt",Biblioteka.TempBiblioteka.ToString(), Encoding.Default);
+                listBox1.Items.Add(Biblioteka.TempBiblioteka);
+                Biblioteka.TempBiblioteka = new Biblioteka();
+                //toolStripMenuItem1_Click(sender, EventArgs.Empty); //Вызов считывания файла
+                MessageBox.Show("Добавлено");
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine($"Ошибка {exception.Message}");
+            }
+        }
     }
 }
+
+
+//private void textBox1_TextChanged(object sender, EventArgs e) //Поиск по ListBox
+//{
+//    try
+//    {
+//        if (textBox1.TextLength != 0 && listBox1.Items.Count != 0)
+//        {
+//            listBox1.SelectedIndex = -1;
+//            listBox2.BeginUpdate();
+//            listBox2.Items.Clear();
+//            var result = from knigga in listBox1.Items.Cast<Biblioteka>().AsParallel()
+//                         where knigga.Name.ToLower().Contains(textBox1.Text.ToLower()) || knigga.Genre.ToLower().Contains(textBox1.Text.ToLower()) ||
+//                               knigga.Authors.ToLower().Contains(textBox1.Text.ToLower())
+//                         select knigga;
+//            //foreach (Biblioteka biblioteka in result) //Проверочный КОД. Не трогать без причины;
+//            //{
+//            //    int i=0;
+//            //    i++;
+//            //}
+
+//            listBox1.Visible = false;
+//            listBox2.Items.AddRange(result.ToArray());
+//            listBox2.EndUpdate();
+//        }
+//        else
+//        {
+//            listBox2.SelectedIndex = -1;
+//            //MessageBox.Show("Либо в листбоксе нет элементов, либо строка поиска стала пустой"); //Разделить случай когда ничего не введено и когда нет элементов в листбоксе
+//            listBox1.Visible = true;
+
+//        }
+//    }
+//    catch (Exception aException)
+//    {
+//        MessageBox.Show($"Ошибка:{aException.Message}");
+//    }
+//}
