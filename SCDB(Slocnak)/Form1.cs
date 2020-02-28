@@ -20,6 +20,8 @@ namespace SCDB_Slocnak_
             InitializeComponent();
         }
 
+        public String Path { get; set; } = "C:\\Users\\User\\Documents\\LabResources\\BD.txt";
+
         private void Form1_Load(object sender, EventArgs e)
         {
             listBox1.DisplayMember = "name";
@@ -122,23 +124,21 @@ namespace SCDB_Slocnak_
                 if (open.ShowDialog() != DialogResult.Cancel)
                 {
                     listBox1.Items.Clear();
-                    File.OpenText(open.FileName).ReadLine().Contains("4");
-                    File.
-                    string[] allBookStrings = File.ReadAllLines(open.FileName, Encoding.Default);
+                    string[] allBookStrings = File.ReadAllLines(Path, Encoding.Default);
                     if (allBookStrings.Length != 0)
                     {
                         foreach (string bookString in allBookStrings)
                         {
                             string[] booksSplit = bookString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-                            if (booksSplit.Length != 11)
+                            if (booksSplit.Length != 12)
                             {
                                 MessageBox.Show("Запись повреждена");
                             }
                             else
                             {
-                                Biblioteka book = new Biblioteka(booksSplit[0], booksSplit[1], booksSplit[2], booksSplit[4],
-                                    booksSplit[5], booksSplit[6], booksSplit[7], booksSplit[8], booksSplit[9], booksSplit[10],
-                                    booksSplit[3]);
+                                Biblioteka book = new Biblioteka(booksSplit[1], booksSplit[2], booksSplit[3], booksSplit[5],
+                                    booksSplit[6], booksSplit[7], booksSplit[8], booksSplit[9], booksSplit[10], booksSplit[11],
+                                    booksSplit[4]);
                                 listBox1.Items.Add(book);
                             }
                             
@@ -190,14 +190,14 @@ namespace SCDB_Slocnak_
             }
         }
 
-        private void toolStripMenuItem2_Click(object sender, EventArgs e)
+        private void toolStripMenuItem2_Click(object sender, EventArgs e) //Добавление
         {
             try
             {
                 Add add=new Add();
                 add.ShowDialog();
-                File.AppendAllText($"C:\\Users\\User\\Documents\\LabResources\\BD.txt",Biblioteka.TempBiblioteka.ToString(), Encoding.Default);
-                listBox1.Items.Add(Biblioteka.TempBiblioteka);
+                File.AppendAllText(Path, $"\n{File.ReadAllLines(Path).Length+1};{Biblioteka.TempBiblioteka.ToString()}", Encoding.Default);
+                    listBox1.Items.Add(Biblioteka.TempBiblioteka);
                 Biblioteka.TempBiblioteka = new Biblioteka();
                 //toolStripMenuItem1_Click(sender, EventArgs.Empty); //Вызов считывания файла
                 MessageBox.Show("Добавлено");
