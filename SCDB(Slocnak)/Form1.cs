@@ -25,11 +25,7 @@ namespace SCDB_Slocnak_
         private void Form1_Load(object sender, EventArgs e)
         {
             listBox1.DisplayMember = "name";
-            listBox2.DisplayMember = "name";
-            Biblioteka knigga= new Biblioteka("Nevagno","Wtf","Genre","1234231","ERA", "Мягкий", "ОтВерблюда","2019","2000","0/10 Burhable","1990" );
-            Biblioteka knigga2= new Biblioteka("bruh","who","gog","2332-123","POP","Мягкий","ОтБога","с 2001 года","2000","11/10 Шедеврально","10000");
-            listBox1.Items.Add(knigga);
-            listBox1.Items.Add(knigga2);
+            listBox2.DisplayMember = "name"; 
             // listBox1.BeginUpdate();
             // var bruh= listBox1.Items.Cast<Biblioteka>().AsParallel().AsOrdered().OrderBy(biblioteka => biblioteka.Name);   //Код для будущей сортировки
             // var savedBruh = bruh.ToArray();
@@ -124,7 +120,7 @@ namespace SCDB_Slocnak_
                 if (open.ShowDialog() != DialogResult.Cancel)
                 {
                     listBox1.Items.Clear();
-                    string[] allBookStrings = File.ReadAllLines(Path, Encoding.Default);
+                    string[] allBookStrings = File.ReadAllLines(Path);
                     if (allBookStrings.Length != 0)
                     {
                         foreach (string bookString in allBookStrings)
@@ -190,14 +186,75 @@ namespace SCDB_Slocnak_
             }
         }
 
-        private void toolStripMenuItem2_Click(object sender, EventArgs e) //Добавление
+        private void toolStripMenuItem3_Click(object sender, EventArgs e) //Удаление
         {
             try
             {
-                Add add=new Add();
-                add.ShowDialog();
-                File.AppendAllText(Path, $"\n{File.ReadAllLines(Path).Length+1};{Biblioteka.TempBiblioteka.ToString()}", Encoding.Default);
-                    listBox1.Items.Add(Biblioteka.TempBiblioteka);
+                List<String> lines = new List<string>(File.ReadAllLines(Path));
+                lines.RemoveAt(listBox1.SelectedIndex);
+                listBox1.Items.Remove(listBox1.SelectedItem);
+                File.Delete(Path);
+                File.AppendAllLines(Path, lines, Encoding.Default);
+                MessageBox.Show("Удалено");
+            }
+            catch (Exception eaException)
+            {
+                Console.WriteLine($"Ошибка {eaException.Message}");
+            }
+        }
+
+        private void toolStripMenuItem4_Click(object sender, EventArgs e) //Редактирование
+        {
+            try
+            {
+                Biblioteka.TempBiblioteka = (Biblioteka)listBox1.SelectedItem;
+                Edit edit = new Edit();
+                if (edit.ShowDialog()== DialogResult.Cancel)
+                {
+                    MessageBox.Show("Отменено");
+                    return;
+                }
+                //int cnt = 0;
+                List<string> linesList = new List<string>(File.ReadAllLines(Path));
+                linesList.RemoveAt(listBox1.SelectedIndex);
+                listBox1.Items.Remove(listBox1.SelectedItem);
+                linesList.Add($"{File.ReadAllLines(Path).Length+1};" + Biblioteka.TempBiblioteka.ToString());
+                listBox1.Items.Add(Biblioteka.TempBiblioteka);
+                File.Delete(Path);
+                File.AppendAllLines(Path, linesList);
+               Biblioteka.TempBiblioteka = null;
+                //string[] lines = File.ReadAllLines(Path);
+                //foreach (string s in lines)
+                //{
+                //    string[] lineStrings = s.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+                //    if (lineStrings[1]==(Книга)listBox1.Items[listBox1.SelectedIndex])
+                //    {
+
+                //    }
+                //    else
+                //    {
+                //        cnt++;
+                //    }
+                //}
+            }
+            catch (Exception eaException)
+            {
+                MessageBox.Show($"Ошибка {eaException.Message}");
+            }
+        }
+
+        private void toolStripMenuItem5_Click(object sender, EventArgs e) //Добавление
+        {
+            try
+            {
+                Add add = new Add();
+                if (add.ShowDialog() == DialogResult.Cancel)
+                {
+                    MessageBox.Show("Отменено");
+                    return;
+                }
+                File.AppendAllText(Path, $"\n{File.ReadAllLines(Path).Length + 1};{Biblioteka.TempBiblioteka.ToString()}");
+                listBox1.Items.Add(Biblioteka.TempBiblioteka);
                 Biblioteka.TempBiblioteka = new Biblioteka();
                 //toolStripMenuItem1_Click(sender, EventArgs.Empty); //Вызов считывания файла
                 MessageBox.Show("Добавлено");
