@@ -10,6 +10,8 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using PdfSharp.Drawing;
+using PdfSharp.Pdf;
 
 namespace SCDB_Slocnak_
 {
@@ -25,24 +27,7 @@ namespace SCDB_Slocnak_
         private void Form1_Load(object sender, EventArgs e)
         {
             listBox1.DisplayMember = "name";
-            listBox2.DisplayMember = "name"; 
-            // listBox1.BeginUpdate();
-            // var bruh= listBox1.Items.Cast<Biblioteka>().AsParallel().AsOrdered().OrderBy(biblioteka => biblioteka.Name);   //Код для будущей сортировки
-            // var savedBruh = bruh.ToArray();
-            // Thread.Sleep(1000);
-            // listBox1.Items.Clear();
-            // listBox1.Items.AddRange(savedBruh.ToArray());
-            // listBox1.EndUpdate();
-            //-----------------------------------------------------------//Нужный участок кода
-            // if (ReadFile())
-            // {
-            //     MessageBox.Show("Успешно загружено");
-            // }
-            // else
-            // {
-            //     MessageBox.Show("Что-то пошло не так. Произвожу закрытие программы");
-            //     // Close();
-            // }
+            listBox2.DisplayMember = "name";
         } //Загрузка формы
 
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e) //Вывод информации об объектах из неотсортированного
@@ -194,7 +179,7 @@ namespace SCDB_Slocnak_
                 lines.RemoveAt(listBox1.SelectedIndex);
                 listBox1.Items.Remove(listBox1.SelectedItem);
                 File.Delete(Path);
-                File.AppendAllLines(Path, lines, Encoding.Default);
+                File.AppendAllLines(Path, lines);
                 MessageBox.Show("Удалено");
             }
             catch (Exception eaException)
@@ -207,7 +192,21 @@ namespace SCDB_Slocnak_
         {
             try
             {
-                Biblioteka.TempBiblioteka = (Biblioteka)listBox1.SelectedItem;
+                int i = listBox1.SelectedIndex;
+                Biblioteka temp = (Biblioteka)listBox1.SelectedItem;
+                if (!Refresh())
+                {
+                    return;
+                }
+
+                listBox1.SelectedIndex = i;
+                Biblioteka temp1 = (Biblioteka)listBox1.SelectedItem;
+                if (temp1.Name!=temp.Name)
+                {
+                    MessageBox.Show("Этот объект удалён или занят");
+                    return;
+                }
+                Biblioteka.TempBiblioteka = temp;
                 Edit edit = new Edit();
                 if (edit.ShowDialog()== DialogResult.Cancel)
                 {
@@ -263,6 +262,120 @@ namespace SCDB_Slocnak_
             {
                 Console.WriteLine($"Ошибка {exception.Message}");
             }
+        }
+
+        private bool Refresh() //Обновление ListBox
+        {
+            try
+            {
+                listBox1.Items.Clear();
+                string[] allBookStrings = File.ReadAllLines(Path);
+                bool isdamaged = false;
+                if (allBookStrings.Length != 0)
+                {
+                    foreach (string bookString in allBookStrings)
+                    {
+                        string[] booksSplit = bookString.Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (booksSplit.Length != 12)
+                        {
+                            MessageBox.Show("Запись повреждена");
+                            isdamaged = true;
+                        }
+                        else
+                        {
+                            Biblioteka book = new Biblioteka(booksSplit[1], booksSplit[2], booksSplit[3], booksSplit[5],
+                                booksSplit[6], booksSplit[7], booksSplit[8], booksSplit[9], booksSplit[10], booksSplit[11],
+                                booksSplit[4]);
+                            listBox1.Items.Add(book);
+                            isdamaged = false;
+                        }
+                    }
+
+                    return true;
+                }
+                else
+                {
+                    MessageBox.Show("Нечего считывать(((");
+                    return false;
+                }
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show($"Ошибка: {e.Message}");
+                return false;
+            }
+        } //Метод для обновления содержимого ListBox
+
+        private void toolStripMenuItem6_Click(object sender, EventArgs e) //Экспорт в PDF
+        {
+            try
+            {
+                if (listBox2.SelectedItems.Count == 0)
+                {
+                    MessageBox.Show("Книг для сохранения в PDF нет");
+                    return;
+                }
+
+                SaveFileDialog savepdf = new SaveFileDialog();
+                if (savepdf.ShowDialog() == DialogResult.Cancel)
+                {
+                    MessageBox.Show("Вы отменили");
+                    return;
+                }
+
+                PdfDocument mypdf = new PdfDocument();
+                string FileName = savepdf.FileName;
+                XFont font = new XFont("Verdania", 14, XFontStyle.Bold);
+                for (int i = 0; i < listBox2.SelectedItems.Count; i++)
+                {
+                    int k = 30;
+                    Biblioteka book = (Biblioteka) listBox2.SelectedItems[i];
+                    PdfPage page = mypdf.AddPage();
+                    XGraphics gfx = XGraphics.FromPdfPage(page);
+                    foreach (Biblioteka item in listBox2.SelectedItems)
+                    {
+                        gfx.DrawString(item.ToString(), font, XBrushes.Black, new XRect(0, k, page.Width, page.Height),
+                            XStringFormat.TopCenter);
+                        k += 14;
+                    }
+
+                }
+
+                mypdf.Save(FileName);
+                MessageBox.Show("Сохранено в PDF!");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка: {ex.Message}");
+            }
+        }
+    
+
+        private void toolStripMenuItem7_Click(object sender, EventArgs e) //Отсортировать
+        {
+            try
+            {
+                listBox1.Visible = false;
+                listBox2.Items.Clear();
+                if (listBox1.Items.Count!=0)
+                {
+                    var sortedArray = listBox1.Items.Cast<Biblioteka>().AsParallel().AsOrdered().OrderBy(a => a.Name);
+                    listBox2.Items.AddRange(sortedArray.ToArray());
+                }
+                else
+                {
+                    MessageBox.Show("Нечего сортировать :(");
+                }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show($"Ошибка: {exception.Message}");
+            }
+        }
+
+        private void toolStripMenuItem8_Click(object sender, EventArgs e) //Возвращение к первому листбоксу
+        {
+            listBox1.Visible = !listBox1.Visible;
         }
     }
 }
